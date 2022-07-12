@@ -12,10 +12,10 @@ use std::io::BufReader;
 use std::io::Write;
 use std::path::Path;
 
-extern crate regex;
 use regex::Regex;
 
 const LIBRS_FILENAME: &str = "src/lib.rs";
+const RESERVED_LIBRS_MOD_NAME: &str = "_reserved_librs";
 
 #[derive(Debug, Clone)]
 pub struct Bundler<'a> {
@@ -84,7 +84,7 @@ impl<'a> Bundler<'a> {
         println!("rerun-if-changed={}", self.bundle_filename.display());
     }
 
-    /// From the file that has the main() function, expand "extern
+    /// From the file that has the main() function, expand first "extern
     /// crate <_crate_name>" into lib.rs contents, and smartly skips
     /// "use <_crate_name>::" lines.
     fn binrs(&mut self, mut o: &mut File) -> Result<(), io::Error> {
@@ -100,15 +100,18 @@ impl<'a> Bundler<'a> {
         );
 
         let mut line = String::new();
+        let mut first = true;
         while bin_reader.read_line(&mut line).unwrap() > 0 {
             line.truncate(line.trim_end().len());
             if self.comment_re.is_match(&line) || self.warn_re.is_match(&line) {
-            } else if extcrate_re.is_match(&line) {
-                self.librs(o)?;
             } else if let Some(cap) = usecrate_re.captures(&line) {
+                if first {
+                    self.librs(o)?;
+                    first = false;
+                }
                 let moduse = cap.get(1).unwrap().as_str();
                 if !self.skip_use.contains(moduse) {
-                    writeln!(&mut o, "use {};", moduse)?;
+                    writeln!(&mut o, "use {}::{};", RESERVED_LIBRS_MOD_NAME, moduse)?;
                 }
             } else {
                 self.write_line(o, &line)?;
@@ -126,6 +129,7 @@ impl<'a> Bundler<'a> {
         let mod_re = source_line_regex(r" (pub  )?mod  (?P<m>.+) ; ");
 
         let mut line = String::new();
+        writeln!(o, "pub mod {} {{", RESERVED_LIBRS_MOD_NAME)?;
         while lib_reader.read_line(&mut line).unwrap() > 0 {
             line.pop();
             if self.comment_re.is_match(&line) || self.warn_re.is_match(&line) {
@@ -139,6 +143,7 @@ impl<'a> Bundler<'a> {
             }
             line.clear(); // clear to reuse the buffer
         }
+        writeln!(o, "}}")?;
         Ok(())
     }
 

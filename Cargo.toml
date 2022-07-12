@@ -1,11 +1,12 @@
 [package]
 name = "rustsourcebundler"
-version = "0.9.0"
-authors = ["Leandro Lisboa Penz <lpenz@lpenz.org>"]
+version = "0.1.0"
+authors = ["Luma <world@luma.email>"]
 description = "Bundle the source code of a rust cargo crate in a single source file"
 license = "MIT"
-homepage = "https://github.com/lpenz/rust-sourcebundler"
-repository = "https://github.com/lpenz/rust-sourcebundler.git"
+homepage = "https://github.com/LumaKernel/rust-sourcebundler"
+repository = "https://github.com/LumaKernel/rust-sourcebundler.git"
+edition = "2021"
 
 [dependencies]
 regex = "1.5.6"
