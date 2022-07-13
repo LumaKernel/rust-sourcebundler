@@ -26,7 +26,6 @@ pub struct Bundler<'a> {
     comment_re: Regex,
     warn_re: Regex,
     _crate_name: &'a str,
-    skip_use: HashSet<String>,
 }
 
 /// Defines a regex to match a line of rust source.
@@ -55,7 +54,6 @@ impl<'a> Bundler<'a> {
             comment_re: source_line_regex(r" "),
             warn_re: source_line_regex(r" #!\[warn\(.*"),
             _crate_name: "",
-            skip_use: HashSet::new(),
         }
     }
 
@@ -103,9 +101,7 @@ impl<'a> Bundler<'a> {
                     first = false;
                 }
                 let moduse = cap.get(1).unwrap().as_str();
-                if !self.skip_use.contains(moduse) {
-                    writeln!(&mut o, "use {}::{};", RESERVED_LIBRS_MOD_NAME, moduse)?;
-                }
+                writeln!(&mut o, "use {}::{};", RESERVED_LIBRS_MOD_NAME, moduse)?;
             } else {
                 self.write_line(o, &line)?;
             }
@@ -169,7 +165,6 @@ impl<'a> Bundler<'a> {
         let mut line = String::new();
 
         writeln!(&mut o, "pub mod {} {{", mod_name)?;
-        self.skip_use.insert(String::from(mod_import));
 
         while mod_reader.read_line(&mut line).unwrap() > 0 {
             line.truncate(line.trim_end().len());
