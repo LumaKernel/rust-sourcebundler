@@ -30,7 +30,6 @@ And create the file *build.rs* with the following:
 /*! Bundle mybin.rs and the crate libraries into singlefile.rs */
 
 use std::path::Path;
-extern crate rustsourcebundler;
 use rustsourcebundler::Bundler;
 
 fn main() {
