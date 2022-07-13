@@ -19,6 +19,7 @@ const RESERVED_LIBRS_MOD_NAME: &str = "_reserved_librs";
 
 #[derive(Debug, Clone)]
 pub struct Bundler<'a> {
+    _header: &'a str,
     binrs_filename: &'a Path,
     bundle_filename: &'a Path,
     librs_filename: &'a Path,
@@ -47,6 +48,7 @@ fn source_line_regex<S: AsRef<str>>(source_regex: S) -> Regex {
 impl<'a> Bundler<'a> {
     pub fn new(binrs_filename: &'a Path, bundle_filename: &'a Path) -> Bundler<'a> {
         Bundler {
+            _header: "",
             binrs_filename,
             bundle_filename,
             librs_filename: Path::new(LIBRS_FILENAME),
@@ -59,6 +61,10 @@ impl<'a> Bundler<'a> {
 
     pub fn crate_name(&mut self, name: &'a str) {
         self._crate_name = name;
+    }
+
+    pub fn header(&mut self, header: &'a str) {
+        self._header = header;
     }
 
     pub fn run(&mut self) {
@@ -81,10 +87,6 @@ impl<'a> Bundler<'a> {
         let bin_fd = File::open(self.binrs_filename)?;
         let mut bin_reader = BufReader::new(&bin_fd);
 
-        let extcrate_re = source_line_regex(format!(
-            r" extern  crate  {} ; ",
-            String::from(self._crate_name)
-        ));
         let usecrate_re = source_line_regex(
             format!(r" use  {} :: (.*) ; ", String::from(self._crate_name)).as_str(),
         );
@@ -119,6 +121,7 @@ impl<'a> Bundler<'a> {
         let mod_re = source_line_regex(r" (pub  )?mod  (?P<m>.+) ; ");
 
         let mut line = String::new();
+        writeln!(o, "{}", &self._header)?;
         writeln!(o, "pub mod {} {{", RESERVED_LIBRS_MOD_NAME)?;
         while lib_reader.read_line(&mut line).unwrap() > 0 {
             line.pop();

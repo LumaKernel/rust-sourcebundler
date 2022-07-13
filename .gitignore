@@ -11,4 +11,4 @@ Cargo.lock
 
 # Files in example
 /example/target
-/example/src/bin/singlefile.rs
+/example/src/bin/bundled.rs
