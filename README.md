@@ -44,6 +44,12 @@ fn main() {
 You can use the code inside the *example* directory of this repository
 as a starting point.
 
+## Limitations
+
+- You can't use reserved mod name `_reserved_librs`.
+- You can't use `use <crate>::{mod1, mod2}` syntax for top level.
+  - You should write in one line per one top level mod.
+
 
 ## Similar Projects
 
