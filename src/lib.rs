@@ -93,6 +93,7 @@ impl<'a> Bundler<'a> {
 
         let mut line = String::new();
         let mut first = true;
+        writeln!(o, "{}", &self._header)?;
         while bin_reader.read_line(&mut line).unwrap() > 0 {
             line.truncate(line.trim_end().len());
             if self.comment_re.is_match(&line) || self.warn_re.is_match(&line) {
@@ -121,7 +122,6 @@ impl<'a> Bundler<'a> {
         let mod_re = source_line_regex(r" (pub  )?mod  (?P<m>.+) ; ");
 
         let mut line = String::new();
-        writeln!(o, "{}", &self._header)?;
         writeln!(o, "pub mod {} {{", RESERVED_LIBRS_MOD_NAME)?;
         while lib_reader.read_line(&mut line).unwrap() > 0 {
             line.pop();
