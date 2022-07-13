@@ -1,5 +1,5 @@
-[![CI](https://github.com/lpenz/rust-sourcebundler/actions/workflows/ci.yml/badge.svg)](https://github.com/lpenz/rust-sourcebundler/actions/workflows/ci.yml)
-[![coveralls](https://coveralls.io/repos/github/lpenz/rust-sourcebundler/badge.svg?branch=main)](https://coveralls.io/github/lpenz/rust-sourcebundler?branch=main)
+[![CI](https://github.com/LumaKernel/rust-sourcebundler/actions/workflows/ci.yml/badge.svg)](https://github.com/LumaKernel/rust-sourcebundler/actions/workflows/ci.yml)
+[![coveralls](https://coveralls.io/repos/github/LumaKernel/rust-sourcebundler/badge.svg?branch=main)](https://coveralls.io/github/LumaKernel/rust-sourcebundler?branch=main)
 [![crates.io](https://img.shields.io/crates/v/rustsourcebundler.svg)](https://crates.io/crates/rustsourcebundler)
 
 # rust-sourcebundler
@@ -21,7 +21,7 @@ Add the following snippet to your *Cargo.toml*:
 build = "build.rs"
 
 [build-dependencies]
-rustsourcebundler = { git = "https://github.com/lpenz/rust-sourcebundler" }
+rustsourcebundler = { git = "https://github.com/LumaKernel/rust-sourcebundler" }
 ```
 
 And create the file *build.rs* with the following:
