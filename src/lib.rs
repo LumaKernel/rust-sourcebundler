@@ -4,7 +4,6 @@ Use this library in your build.rs to create a single file with all the crate's s
 That's useful for programming exercise sites that take a single source file.
 */
 
-use std::collections::HashSet;
 use std::fs::File;
 use std::io;
 use std::io::BufRead;
@@ -26,6 +25,7 @@ pub struct Bundler<'a> {
     comment_re: Regex,
     warn_re: Regex,
     _crate_name: &'a str,
+    _silent: bool,
 }
 
 /// Defines a regex to match a line of rust source.
@@ -54,6 +54,7 @@ impl<'a> Bundler<'a> {
             comment_re: source_line_regex(r" "),
             warn_re: source_line_regex(r" #!\[warn\(.*"),
             _crate_name: "",
+            _silent: false,
         }
     }
 
@@ -63,6 +64,10 @@ impl<'a> Bundler<'a> {
 
     pub fn header(&mut self, header: &'a str) {
         self._header = header;
+    }
+
+    pub fn silent(&mut self, silent: bool) {
+        self._silent = silent;
     }
 
     pub fn run(&mut self) {
@@ -75,7 +80,9 @@ impl<'a> Bundler<'a> {
                 self.binrs_filename.display()
             )
         });
-        println!("rerun-if-changed={}", self.bundle_filename.display());
+        if !self._silent {
+            println!("rerun-if-changed={}", self.bundle_filename.display());
+        }
     }
 
     /// From the file that has the main() function, expand first "extern
