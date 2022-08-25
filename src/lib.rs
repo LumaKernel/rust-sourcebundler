@@ -92,27 +92,55 @@ impl<'a> Bundler<'a> {
         let bin_fd = File::open(self.binrs_filename)?;
         let mut bin_reader = BufReader::new(&bin_fd);
 
+        let linemacro_re = source_line_regex(r" # \[.*");
+        let empty_re = source_line_regex(r" ");
+        let extcrate_re = source_line_regex(format!(r" extern  crate  {} ; ", self._crate_name));
         let usecrate_re = source_line_regex(
             format!(r" use  {} :: (.*) ; ", String::from(self._crate_name)).as_str(),
         );
 
         let mut line = String::new();
         let mut first = true;
-        writeln!(o, "{}", &self._header)?;
+        let mut line_macros = Vec::<String>::new();
         while bin_reader.read_line(&mut line).unwrap() > 0 {
-            line.truncate(line.trim_end().len());
+            if line.ends_with('\n') {
+                line = line[..line.len() - 1].to_string();
+            }
             if self.comment_re.is_match(&line) || self.warn_re.is_match(&line) {
-            } else if let Some(cap) = usecrate_re.captures(&line) {
+            } else if linemacro_re.is_match(&line) || empty_re.is_match(&line) {
+                line_macros.push(line.clone());
+            } else if extcrate_re.is_match(&line) {
+                line_macros.clear();
                 if first {
                     self.librs(o)?;
                     first = false;
                 }
+            } else if let Some(cap) = usecrate_re.captures(&line) {
                 let moduse = cap.get(1).unwrap().as_str();
+                if first {
+                    self.librs(o)?;
+                    first = false;
+                }
                 writeln!(&mut o, "use {}::{};", RESERVED_LIBRS_MOD_NAME, moduse)?;
             } else {
+                if let Some(result) = line_macros
+                    .iter()
+                    .map(|e| self.write_line(o, e))
+                    .find(|e| e.is_err())
+                {
+                    result?;
+                }
+                line_macros.clear();
                 self.write_line(o, &line)?;
             }
             line.clear();
+        }
+        if let Some(result) = line_macros
+            .iter()
+            .map(|e| self.write_line(o, e))
+            .find(|e| e.is_err())
+        {
+            result?;
         }
         Ok(())
     }
